@@ -4,9 +4,28 @@ mod math;
 use crate::math::{Vec3, Rgb};
 use crate::ray::Ray;
 
-fn color(ray: Ray) -> Rgb
+fn hit_sphere(center: Vec3, radius: f64, r: &Ray) -> f64
 {
-    let unit_direction = ray.direction().normalized();
+    let oc = r.origin() - center;
+    let a = r.direction().dot(r.direction());
+    let b = 2.0 * oc.dot(r.direction());
+    let c = oc.dot(oc) - radius * radius;
+    let discriminant = b*b - 4.0*a*c;
+    if discriminant < 0.0 {
+        return -1.0;
+    }
+    return (-b - discriminant.sqrt()) / (2.0*a);
+}
+
+fn color(r: Ray) -> Rgb
+{
+    let t = hit_sphere(Vec3{x: 0.0, y: 0.0, z: -1.0}, 0.5, &r);
+    if t > 0.0
+    {
+        let N: Vec3 = (r.at(t) - Vec3 {x: 0.0, y: 0.0, z: -1.0}).normalized();
+        return 0.5 * Rgb {r: N.x + 1.0, g: N.y + 1.0, b: N.z + 1.0};
+    }
+    let unit_direction = r.direction().normalized();
     let t = 0.5 * (unit_direction.y + 1.0);
     return (1.0-t) * Rgb {r: 1.0, g: 1.0, b: 1.0} + t * Rgb {r: 0.5, g: 0.7, b: 1.0};
 }
