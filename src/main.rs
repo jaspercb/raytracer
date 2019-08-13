@@ -52,8 +52,12 @@ fn main() {
     let nx : u32 = 200;
     let ny : u32 = 100;
 
-    let cam: Camera = Camera::new(Vec3::new(-2.0, 2.0, 1.0), Vec3::new(0.0, 0.0, -1.0), Vec3::new(0.0, 1.0, 0.0), 90.0, (nx as f64)/(ny as f64));
-    let nsamples = 20;
+    let lookfrom = Vec3::new(3.0, 3.0, 2.0);
+    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let dist_to_focus = (lookat - lookfrom).magnitude();
+    let aperture = 2.0;
+    let cam: Camera = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 20.0, (nx as f64)/(ny as f64), aperture, dist_to_focus);
+    let nsamples = 10;
     println!("P3\n{0} {1}\n255\n", nx, ny);
     for j in (0..ny).rev()
     {

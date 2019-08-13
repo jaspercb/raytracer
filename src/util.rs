@@ -20,6 +20,19 @@ pub fn random_in_unit_sphere() -> Vec3 {
     return Vec3{x: x, y: y, z:z};
 }
 
+pub fn random_in_unit_disk() -> Vec3 {
+    let mut rng = rand::thread_rng();
+    let mut p;
+    loop {
+        p = 2.0 * Vec3::new(rng.gen(), rng.gen(), 0.0) - Vec3::new(1.0, 1.0, 0.0);
+        if (p.dot(p)) < 1.0
+        {
+            break;
+        }
+    }
+    return p;
+}
+
 pub fn reflect(in_vec: Vec3, normal: Vec3) -> Vec3 {
     return in_vec - 2.0 * normal.dot(in_vec) * normal;
 }
