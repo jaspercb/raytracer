@@ -17,8 +17,8 @@ fn main() {
     let mut hl: HittableList = HittableList::new();
     hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Lambertian::new(Rgb {r: 0.8, g: 0.3, b: 0.3}))}));
     hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -100.5, z: -1.0}, radius: 100.0, mat: Box::new(Lambertian::new(Rgb {r: 0.8, g: 0.8, b: 0.0}))}));
-    hl.push(Box::new(Sphere{center: Vec3{x: 1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.6, b: 0.2}))}));
-    hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.8, b: 0.8}))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.6, b: 0.2}, 0.3))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.8, b: 0.8}, 1.0))}));
 
     fn color(hl: &HittableList, r: &Ray, depth: u8) -> Rgb
     {
