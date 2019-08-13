@@ -52,8 +52,8 @@ fn main() {
     let nx : u32 = 200;
     let ny : u32 = 100;
 
-    let cam: Camera = Camera::new();
-    let nsamples = 100;
+    let cam: Camera = Camera::new(150.0, (nx as f64)/(ny as f64));
+    let nsamples = 10;
     println!("P3\n{0} {1}\n255\n", nx, ny);
     for j in (0..ny).rev()
     {
