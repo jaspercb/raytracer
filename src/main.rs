@@ -10,6 +10,7 @@ use raytracer::camera::Camera;
 use raytracer::primitives::Sphere;
 use raytracer::material::lambertian::Lambertian;
 use raytracer::material::metal::Metal;
+use raytracer::material::dielectric::Dielectric;
 
 fn main() {
     let mut rng = rand::thread_rng();
@@ -18,7 +19,8 @@ fn main() {
     hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Lambertian::new(Rgb {r: 0.8, g: 0.3, b: 0.3}))}));
     hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -100.5, z: -1.0}, radius: 100.0, mat: Box::new(Lambertian::new(Rgb {r: 0.8, g: 0.8, b: 0.0}))}));
     hl.push(Box::new(Sphere{center: Vec3{x: 1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.6, b: 0.2}, 0.3))}));
-    hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.8, b: 0.8}, 1.0))}));
+    // hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.8, b: 0.8}, 1.0))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Dielectric::new(1.5))}));
 
     fn color(hl: &HittableList, r: &Ray, depth: u8) -> Rgb
     {
@@ -51,7 +53,7 @@ fn main() {
     let ny : u32 = 100;
 
     let cam: Camera = Camera::new();
-    let nsamples = 10;
+    let nsamples = 100;
     println!("P3\n{0} {1}\n255\n", nx, ny);
     for j in (0..ny).rev()
     {
