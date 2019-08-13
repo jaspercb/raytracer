@@ -2,45 +2,41 @@ extern crate raytracer;
 extern crate rand;
 
 use rand::Rng;
-use rand::prelude::ThreadRng;
 
 use raytracer::math::{Vec3, Rgb};
 use raytracer::ray::Ray;
 use raytracer::hittablelist::HittableList;
 use raytracer::camera::Camera;
 use raytracer::primitives::Sphere;
-
-fn random_in_unit_sphere(rng: &mut ThreadRng) -> Vec3 {
-    let mut x;
-    let mut y;
-    let mut z;
-    loop {
-        x = 2.0*(rng.gen::<f64>() - 0.5);
-        y = 2.0*(rng.gen::<f64>() - 0.5);
-        z = 2.0*(rng.gen::<f64>() - 0.5);
-        if (x*x + y*y *z*z) < 1.0
-        {
-            break;
-        }
-    }
-    return Vec3{x: x, y: y, z:z};
-}
+use raytracer::material::lambertian::Lambertian;
+use raytracer::material::metal::Metal;
 
 fn main() {
     let mut rng = rand::thread_rng();
 
     let mut hl: HittableList = HittableList::new();
-    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: 0.0, z: -1.0}, radius: 0.5}));
-    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -100.5, z: -1.0}, radius: 100.0}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Lambertian::new(Rgb {r: 0.8, g: 0.3, b: 0.3}))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -100.5, z: -1.0}, radius: 100.0, mat: Box::new(Lambertian::new(Rgb {r: 0.8, g: 0.8, b: 0.0}))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.6, b: 0.2}))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.8, b: 0.8}))}));
 
-    fn color(hl: &HittableList, r: &Ray, mut rng: &mut ThreadRng) -> Rgb
+    fn color(hl: &HittableList, r: &Ray, depth: u8) -> Rgb
     {
-        let mrh = hl.hit(&r, 0.0001, 99999999999.);
+        if depth >= 50 { return Rgb::zero(); };
+
+        let mrh = hl.hit(&r, 0.0001, std::f64::MAX);
         match mrh
         {
             Some(rh) => {
-                let target: Vec3 = rh.p + rh.normal + random_in_unit_sphere(&mut rng);
-                return 0.5 * color(&hl, &Ray::new(rh.p, target), &mut rng);
+                match rh.mat_ptr.scatter(&r, &rh)
+                {
+                    Some((reflected, attenuation)) => {
+                        return attenuation * color(&hl, &reflected, depth+1);
+                    }
+                    _ => {
+                        return Rgb::zero();
+                    }
+                }
                 // let normal = rh.normal;
                 // return 0.5 * Rgb {r: normal.x + 1.0, g: normal.y + 1.0, b: normal.z + 1.0};
             },
@@ -67,7 +63,7 @@ fn main() {
                 let u = (i as f64 + rng.gen::<f64>()) / (nx as f64);
                 let v = (j as f64 + rng.gen::<f64>()) / (ny as f64);
                 let r: Ray = cam.get_ray(u, v);
-                col += color(&hl, &r, &mut rng); // / (nsamples as f64);
+                col += color(&hl, &r, 0); // / (nsamples as f64);
             }
             col /= nsamples as f64;
             col = col.sqrt();

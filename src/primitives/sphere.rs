@@ -1,10 +1,13 @@
 use crate::math::Vec3;
 use crate::ray::Ray;
 use crate::hittable::{Hittable, HitRecord};
+use crate::material::Material;
 
+#[derive(Debug)]
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f64,
+    pub mat: Box<dyn Material>,
 }
 
 impl Hittable for Sphere {
@@ -25,7 +28,8 @@ impl Hittable for Sphere {
             return Some(HitRecord {
                 t: temp,
                 p: p,
-                normal: (p - self.center).normalized()
+                normal: (p - self.center).normalized(),
+                mat_ptr: &*self.mat,
             });
         }
         let temp = (-b + discriminant.sqrt()) / (2.0*a);
@@ -34,7 +38,8 @@ impl Hittable for Sphere {
             return Some(HitRecord {
                 t: temp,
                 p: p,
-                normal: (p - self.center).normalized()
+                normal: (p - self.center).normalized(),
+                mat_ptr: &*self.mat,
             });
         }
         return None;
