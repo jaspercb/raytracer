@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 vek = { version = "0.9", features = ["uv"] }
+rand = { version = "0.7.0"}
