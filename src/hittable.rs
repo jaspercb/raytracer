@@ -1,8 +1,9 @@
 use core::fmt::Debug;
 
+use crate::aabb::AABB;
+use crate::material::Material;
 use crate::math::Vec3;
 use crate::ray::Ray;
-use crate::material::Material;
 
 #[derive(Debug, Clone)]
 pub struct HitRecord<'a> {
@@ -14,5 +15,15 @@ pub struct HitRecord<'a> {
 
 pub trait Hittable: Debug {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB>;
+}
+
+impl<'a, T> Hittable for &'a T where T: Hittable {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        return (*self).hit(r, t_min, t_max);
+    }
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB> {
+        return (*self).bounding_box(t0, t1);
+    }
 }
 
