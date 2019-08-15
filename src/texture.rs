@@ -1,4 +1,5 @@
 use crate::math::{Rgb, Vec3};
+use crate::util::Perlin;
 
 pub trait Texture: core::fmt::Debug {
     fn value(&self, u: f64, v: f64, p: Vec3) -> Rgb;
@@ -37,5 +38,23 @@ impl Texture for CheckerTexture {
     fn value(&self, u: f64, v: f64, p: Vec3) -> Rgb {
         let sines = (10.0*p.x).sin() * (10.0*p.y).sin() * (10.0*p.z).sin();
         return (if sines < 0.0 {&self.odd} else {&self.even}).value(u, v, p)
+    }
+}
+
+#[derive(Debug)]
+pub struct NoiseTexture {
+    noise: Perlin,
+    scale: f64,
+}
+
+impl NoiseTexture {
+    pub fn new(noise: Perlin, scale: f64) -> NoiseTexture {
+        Self {noise, scale}
+    }
+}
+
+impl Texture for NoiseTexture {
+    fn value(&self, _u: f64, _v: f64, p: Vec3) -> Rgb {
+        return Rgb::new(1.0, 1.0, 1.0) * self.noise.noise(&(self.scale * p));
     }
 }

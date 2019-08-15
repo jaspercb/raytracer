@@ -1,5 +1,4 @@
-extern crate raytracer;
-extern crate rand;
+extern crate raytracer; extern crate rand;
 
 use rand::Rng;
 
@@ -11,8 +10,9 @@ use raytracer::primitives::Sphere;
 use raytracer::material::lambertian::Lambertian;
 use raytracer::material::metal::Metal;
 use raytracer::material::dielectric::Dielectric;
-use raytracer::texture::{ConstantTexture, CheckerTexture};
+use raytracer::texture::{ConstantTexture, CheckerTexture, NoiseTexture};
 use raytracer::bvh::BvhNode;
+use raytracer::util::Perlin;
 
 fn basic_scene() -> Box<dyn Hittable> {
     let mut hl: Vec<Box<dyn Hittable>> = Vec::new();
@@ -31,10 +31,7 @@ fn big_scene() -> Box<dyn Hittable> {
     hl.push(Box::new(
             Sphere{center: Vec3{x: 0.0, y: -1000.0, z: -0.0}, radius: 1000.0,
             mat: Box::new(Lambertian::new(
-                Box::new(CheckerTexture::new(
-                    Box::new(ConstantTexture::new(Rgb {r: 0.3, g: 0.2, b: 0.1})),
-                    Box::new(ConstantTexture::new(Rgb {r: 0.9, g: 0.9, b: 0.9}))
-                ))
+                Box::new(NoiseTexture::new(Perlin::new(), 5.0))
             ))
         }
     ));
@@ -94,15 +91,15 @@ fn main() {
         return (1.0-t) * Rgb {r: 1.0, g: 1.0, b: 1.0} + t * Rgb {r: 0.5, g: 0.7, b: 1.0};
     }
 
-    let nx : u32 = 200;
-    let ny : u32 = 100;
+    let nx : u32 = 300;
+    let ny : u32 = 200;
 
     let lookfrom = Vec3::new(5.0, 1.0, 2.0);
     let lookat = Vec3::new(0.0, 0.2, 0.0);
     let dist_to_focus = (lookat - lookfrom).magnitude();
     let aperture = 0.1;
     let cam: Camera = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 30.0, (nx as f64)/(ny as f64), aperture, dist_to_focus);
-    let nsamples = 2;
+    let nsamples = 50;
     println!("P3\n{0} {1}\n255\n", nx, ny);
     for j in (0..ny).rev()
     {
