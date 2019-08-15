@@ -11,12 +11,13 @@ use raytracer::primitives::Sphere;
 use raytracer::material::lambertian::Lambertian;
 use raytracer::material::metal::Metal;
 use raytracer::material::dielectric::Dielectric;
+use raytracer::texture::{ConstantTexture, CheckerTexture};
 use raytracer::bvh::BvhNode;
 
 fn basic_scene() -> Box<dyn Hittable> {
     let mut hl: Vec<Box<dyn Hittable>> = Vec::new();
-    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Lambertian::new(Rgb {r: 0.8, g: 0.3, b: 0.3}))}));
-    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -100.5, z: -1.0}, radius: 100.0, mat: Box::new(Lambertian::new(Rgb {r: 0.8, g: 0.8, b: 0.0}))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb::new(0.8, 0.3, 0.3)))))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -100.5, z: -1.0}, radius: 100.0, mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb {r: 0.8, g: 0.8, b: 0.0}))))}));
     hl.push(Box::new(Sphere{center: Vec3{x: 1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.6, b: 0.2}, 0.3))}));
     hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Dielectric::new(1.5))}));
     return BvhNode::construct(&mut hl, 0.0, 0.0);
@@ -27,7 +28,16 @@ fn big_scene() -> Box<dyn Hittable> {
     let mut rng = rand::thread_rng();
 
     // ground
-    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -1000.0, z: -0.0}, radius: 100.0, mat: Box::new(Lambertian::new(Rgb {r: 0.5, g: 0.5, b: 0.5}))}));
+    hl.push(Box::new(
+            Sphere{center: Vec3{x: 0.0, y: -1000.0, z: -0.0}, radius: 1000.0,
+            mat: Box::new(Lambertian::new(
+                Box::new(CheckerTexture::new(
+                    Box::new(ConstantTexture::new(Rgb {r: 0.3, g: 0.2, b: 0.1})),
+                    Box::new(ConstantTexture::new(Rgb {r: 0.9, g: 0.9, b: 0.9}))
+                ))
+            ))
+        }
+    ));
 
     for a in -11..11 {
         for b in -11..11 {
@@ -35,7 +45,7 @@ fn big_scene() -> Box<dyn Hittable> {
             let center = Vec3::new((a as f64) + 0.9 * rng.gen::<f64>(), 0.2, (b as f64) + 0.9*rng.gen::<f64>());
             if (center - Vec3::new(4.0, 0.2, 0.0)).magnitude() > 0.9 {
                 if choose_mat < 0.8 { // diffuse
-                    hl.push(Box::new(Sphere{center, radius: 0.2, mat: Box::new(Lambertian::new(Rgb::new(rng.gen::<f64>()*rng.gen::<f64>(), rng.gen::<f64>()*rng.gen::<f64>(), rng.gen::<f64>()*rng.gen::<f64>())))}));
+                    hl.push(Box::new(Sphere{center, radius: 0.2, mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb::new(rng.gen::<f64>()*rng.gen::<f64>(), rng.gen::<f64>()*rng.gen::<f64>(), rng.gen::<f64>()*rng.gen::<f64>())))))}));
                 } else if choose_mat < 0.95 { // metal
                     hl.push(Box::new(Sphere{center, radius: 0.2, mat: Box::new(Metal::new(Rgb::new(0.5 * (1.0 + rng.gen::<f64>()), 0.5 * (1.0 + rng.gen::<f64>()), 0.5 * (1.0 + rng.gen::<f64>())), 0.5 * rng.gen::<f64>()))}));
                 } else {
@@ -44,7 +54,7 @@ fn big_scene() -> Box<dyn Hittable> {
             }
         }
     }
-    hl.push(Box::new(Sphere{center: Vec3::new(-4.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Lambertian::new(Rgb::new(0.4, 0.2, 0.1)))}));
+    hl.push(Box::new(Sphere{center: Vec3::new(-4.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb::new(0.4, 0.2, 0.1)))))}));
     hl.push(Box::new(Sphere{center: Vec3::new(0.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Dielectric::new(1.5))}));
     hl.push(Box::new(Sphere{center: Vec3::new(4.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Metal::new(Rgb::new(0.7, 0.6, 0.5), 0.0))}));
 
@@ -92,7 +102,7 @@ fn main() {
     let dist_to_focus = (lookat - lookfrom).magnitude();
     let aperture = 0.1;
     let cam: Camera = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 30.0, (nx as f64)/(ny as f64), aperture, dist_to_focus);
-    let nsamples = 50;
+    let nsamples = 2;
     println!("P3\n{0} {1}\n255\n", nx, ny);
     for j in (0..ny).rev()
     {
