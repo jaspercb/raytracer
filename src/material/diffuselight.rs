@@ -1,7 +1,7 @@
+use super::Material;
+use crate::hittable::HitRecord;
 use crate::math::{Rgb, Uv, Vec3};
 use crate::ray::Ray;
-use crate::hittable::HitRecord;
-use super::Material;
 use crate::texture::Texture;
 
 #[derive(Debug)]
@@ -11,7 +11,7 @@ pub struct DiffuseLight {
 
 impl DiffuseLight {
     pub fn new(emit: Box<Texture>) -> Self {
-        return Self {emit};
+        return Self { emit };
     }
 }
 

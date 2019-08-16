@@ -19,7 +19,10 @@ pub trait Hittable: Debug {
     fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB>;
 }
 
-impl<'a, T> Hittable for &'a T where T: Hittable {
+impl<'a, T> Hittable for &'a T
+where
+    T: Hittable,
+{
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         return (*self).hit(r, t_min, t_max);
     }
@@ -27,4 +30,3 @@ impl<'a, T> Hittable for &'a T where T: Hittable {
         return (*self).bounding_box(t0, t1);
     }
 }
-

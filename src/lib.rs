@@ -1,12 +1,12 @@
 extern crate vek;
 
 pub mod aabb;
-pub mod math;
-pub mod util;
-pub mod ray;
-pub mod hittable;
-pub mod primitives;
-pub mod camera;
-pub mod material;
 pub mod bvh;
+pub mod camera;
+pub mod hittable;
+pub mod material;
+pub mod math;
+pub mod primitives;
+pub mod ray;
 pub mod texture;
+pub mod util;

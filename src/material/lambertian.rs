@@ -1,11 +1,11 @@
 extern crate rand;
 
+use super::Material;
+use crate::hittable::HitRecord;
 use crate::math::{Rgb, Vec3};
 use crate::ray::Ray;
-use crate::hittable::HitRecord;
-use crate::util::random_in_unit_sphere;
 use crate::texture::Texture;
-use super::Material;
+use crate::util::random_in_unit_sphere;
 
 #[derive(Debug)]
 pub struct Lambertian {
@@ -14,7 +14,7 @@ pub struct Lambertian {
 
 impl Lambertian {
     pub fn new(albedo: Box<Texture>) -> Lambertian {
-        return Self {albedo};
+        return Self { albedo };
     }
 }
 
