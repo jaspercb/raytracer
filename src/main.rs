@@ -20,30 +20,20 @@ use raytracer::util::Perlin;
 
 fn basic_scene() -> Box<dyn Hittable> {
     let mut hl: Vec<Box<dyn Hittable>> = Vec::new();
-    hl.push(Box::new(Sphere {
-        center: Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: -1.0,
-        },
-        radius: 0.5,
-        mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb::new(
+    hl.push(Box::new(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0),
+        0.5,
+        Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb::new(
             0.8, 0.3, 0.3,
         ))))),
-    }));
-    hl.push(Box::new(Sphere {
-        center: Vec3 {
-            x: 0.0,
-            y: -100.5,
-            z: -1.0,
-        },
-        radius: 100.0,
-        mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb {
-            r: 0.8,
-            g: 0.8,
-            b: 0.0,
-        })))),
-    }));
+    )));
+    hl.push(Box::new(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0),
+        100.0,
+        Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb::new(
+            0.8, 0.8, 0.0,
+        ))))),
+    )));
     hl.push(Box::new(Sphere {
         center: Vec3 {
             x: 1.0,

@@ -34,11 +34,7 @@ impl Material for Dielectric {
                 -r.direction().dot(hr.normal) / r.direction().magnitude(),
             )
         };
-        let attenuation = Rgb {
-            r: 1.0,
-            g: 1.0,
-            b: 1.0,
-        };
+        let attenuation = Rgb::one();
         let reflect_prob: f64;
         let refracted = refract(r.direction(), outward_normal, ni_over_nt);
         let mut rng = rand::thread_rng();
