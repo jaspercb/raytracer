@@ -271,9 +271,9 @@ fn main() {
             col = col.sqrt();
             println!(
                 "{0} {1} {2}",
-                (255.99 * col.r) as u32,
-                (255.99 * col.g) as u32,
-                (255.99 * col.b) as u32
+                (255.99 * col.r.min(1.0).max(0.0)) as u32,
+                (255.99 * col.g.min(1.0).max(0.0)) as u32,
+                (255.99 * col.b.min(1.0).max(0.0)) as u32
             );
         }
     }
