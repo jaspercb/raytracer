@@ -13,6 +13,7 @@ use raytracer::primitives::Sphere;
 use raytracer::material::lambertian::Lambertian;
 use raytracer::material::metal::Metal;
 use raytracer::material::dielectric::Dielectric;
+use raytracer::material::diffuselight::DiffuseLight;
 use raytracer::texture::{ConstantTexture, CheckerTexture, NoiseTexture, ImageTexture};
 use raytracer::bvh::BvhNode;
 use raytracer::util::Perlin;
@@ -23,6 +24,16 @@ fn basic_scene() -> Box<dyn Hittable> {
     hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -100.5, z: -1.0}, radius: 100.0, mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb {r: 0.8, g: 0.8, b: 0.0}))))}));
     hl.push(Box::new(Sphere{center: Vec3{x: 1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.6, b: 0.2}, 0.3))}));
     hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Dielectric::new(1.5))}));
+    return BvhNode::construct(&mut hl, 0.0, 0.0);
+}
+
+fn light_scene() -> Box<dyn Hittable> {
+    let mut hl: Vec<Box<dyn Hittable>> = Vec::new();
+    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb::new(0.8, 0.3, 0.3)))))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: -100.5, z: -1.0}, radius: 100.0, mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb {r: 0.8, g: 0.8, b: 0.0}))))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Metal::new(Rgb {r: 0.8, g: 0.6, b: 0.2}, 0.3))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: -1.0, y: 0.0, z: -1.0}, radius: 0.5, mat: Box::new(Dielectric::new(1.5))}));
+    hl.push(Box::new(Sphere{center: Vec3{x: 0.0, y: 1.5, z: -2.0}, radius: 0.5, mat: Box::new(DiffuseLight::new(Box::new(ConstantTexture::new(Rgb::new(8.0, 8.0, 8.0)))))}));
     return BvhNode::construct(&mut hl, 0.0, 0.0);
 }
 
@@ -71,31 +82,25 @@ fn main() {
     let mut rng = rand::thread_rng();
     
     // let hl = basic_scene();
-    let hl = big_scene();
+    // let hl = big_scene();
+    let hl = light_scene();
 
-    fn color(hl: &Hittable, r: &Ray, depth: u8) -> Rgb
-    {
+    fn color(hl: &Hittable, r: &Ray, depth: u8) -> Rgb {
         if depth >= 50 { return Rgb::zero(); };
 
-        let mrh = hl.hit(&r, 0.0001, std::f64::MAX);
-        match mrh
-        {
-            Some(rh) => {
-                match rh.mat_ptr.scatter(&r, &rh)
-                {
+        match hl.hit(&r, 0.0001, std::f64::MAX) {
+            Some(hr) => {
+                let base: Rgb = match hr.mat_ptr.scatter(&r, &hr) {
                     Some((reflected, attenuation)) => {
-                        return attenuation * color(hl, &reflected, depth+1);
+                        attenuation * color(hl, &reflected, depth+1)
                     }
-                    _ => {
-                        return Rgb::zero();
-                    }
-                }
+                    _ => { Rgb::zero() }
+                };
+                return hr.mat_ptr.emitted(&hr.uv, &hr.p) + base;
             },
             _ => (),
         }
-        let unit_direction = r.direction().normalized();
-        let t = 0.5 * (unit_direction.y + 1.0);
-        return (1.0-t) * Rgb {r: 1.0, g: 1.0, b: 1.0} + t * Rgb {r: 0.5, g: 0.7, b: 1.0};
+        return Rgb::zero();
     }
 
     let nx : u32 = 300;
@@ -106,7 +111,7 @@ fn main() {
     let dist_to_focus = (lookat - lookfrom).magnitude();
     let aperture = 0.1;
     let cam: Camera = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 30.0, (nx as f64)/(ny as f64), aperture, dist_to_focus);
-    let nsamples = 50;
+    let nsamples = 1000;
     println!("P3\n{0} {1}\n255\n", nx, ny);
     for j in (0..ny).rev()
     {

@@ -7,7 +7,7 @@ use crate::math::{Rgb, Uv, Vec3};
 use crate::util::Perlin;
 
 pub trait Texture: core::fmt::Debug {
-    fn value(&self, uv: Uv, p: Vec3) -> Rgb;
+    fn value(&self, uv: &Uv, p: &Vec3) -> Rgb;
 }
 
 #[derive(Debug)]
@@ -22,7 +22,7 @@ impl ConstantTexture {
 }
 
 impl Texture for ConstantTexture {
-    fn value(&self, _uv: Uv, _p: Vec3) -> Rgb {
+    fn value(&self, _uv: &Uv, _p: &Vec3) -> Rgb {
         self.color
     }
 }
@@ -40,7 +40,7 @@ impl CheckerTexture {
 }
 
 impl Texture for CheckerTexture {
-    fn value(&self, uv: Uv, p: Vec3) -> Rgb {
+    fn value(&self, uv: &Uv, p: &Vec3) -> Rgb {
         let sines = (10.0*p.x).sin() * (10.0*p.y).sin() * (10.0*p.z).sin();
         return (if sines < 0.0 {&self.odd} else {&self.even}).value(uv, p)
     }
@@ -59,8 +59,8 @@ impl NoiseTexture {
 }
 
 impl Texture for NoiseTexture {
-    fn value(&self, _uv: Uv, p: Vec3) -> Rgb {
-        return Rgb::new(1.0, 1.0, 1.0) * self.noise.noise(&(self.scale * p));
+    fn value(&self, _uv: &Uv, p: &Vec3) -> Rgb {
+        return Rgb::new(1.0, 1.0, 1.0) * self.noise.noise(&(self.scale * *p));
     }
 }
 
@@ -75,7 +75,7 @@ impl ImageTexture {
 }
 
 impl Texture for ImageTexture {
-    fn value(&self, uv: Uv, _p: Vec3) -> Rgb {
+    fn value(&self, uv: &Uv, _p: &Vec3) -> Rgb {
         let (nx, ny) = self.image.dimensions();
         let i = ((uv.u * nx as f64) as u32).max(0).min(nx-1);
         let j = (((1.0 - uv.v) * (ny as f64) - 0.001) as u32).max(0).min(ny-1);

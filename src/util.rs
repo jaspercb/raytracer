@@ -17,7 +17,7 @@ pub fn random_in_unit_sphere() -> Vec3 {
             break;
         }
     }
-    return Vec3{x: x, y: y, z:z};
+    return Vec3::new(x, y, z);
 }
 
 pub fn random_in_unit_disk() -> Vec3 {
@@ -158,8 +158,8 @@ pub fn get_sphere_uv(p: &Vec3) -> Uv {
     let pp = p.normalized();
     let phi = pp.z.atan2(pp.x);
     let theta = pp.y.asin();
-    let PI = std::f64::consts::PI;
-    let u = 1.0 - (phi + PI) / (2.0 * PI);
-    let v = (theta + PI/2.0) / PI;
+    let pi = std::f64::consts::PI;
+    let u = 1.0 - (phi + pi) / (2.0 * pi);
+    let v = (theta + pi/2.0) / pi;
     return Uv::new(u, v);
 }
