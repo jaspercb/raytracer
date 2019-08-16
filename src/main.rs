@@ -1,8 +1,10 @@
 extern crate image;
 extern crate rand;
+extern crate rayon;
 extern crate raytracer;
 
 use rand::Rng;
+use rayon::prelude::*;
 use std::path::Path;
 
 use raytracer::bvh::BvhNode;
@@ -235,8 +237,9 @@ fn main() {
         return Rgb::zero();
     }
 
-    let nx: u32 = 300;
-    let ny: u32 = 150;
+    let nx = 300;
+    let ny = 150;
+    let nsamples = 100;
 
     let lookfrom = Vec3::new(5.0, 1.0, 2.0);
     let lookat = Vec3::new(0.0, 0.2, 0.0);
@@ -251,30 +254,39 @@ fn main() {
         aperture,
         dist_to_focus,
     );
-    let nsamples = 1000;
     println!("P3\n{0} {1}\n255\n", nx, ny);
+    let mut pixels: Vec<(u32, u32)> = Vec::new();
     for j in (0..ny).rev() {
         // if (j % 10 == 0) { eprintln!("{}/{}", j, ny); }
         for i in 0..nx {
+            pixels.push((i, j));
+        }
+    }
+    for col in pixels
+        .par_iter()
+        .map(|(i, j)| -> Rgb {
             let mut col = Rgb {
                 r: 0.0,
                 g: 0.0,
                 b: 0.0,
             };
+            let mut trng = rand::thread_rng();
             for _ in 0..nsamples {
-                let u = (i as f64 + rng.gen::<f64>()) / (nx as f64);
-                let v = (j as f64 + rng.gen::<f64>()) / (ny as f64);
+                let u = (*i as f64 + trng.gen::<f64>()) / (nx as f64);
+                let v = (*j as f64 + trng.gen::<f64>()) / (ny as f64);
                 let r: Ray = cam.get_ray(u, v);
                 col += color(&*hl, &r, 0);
             }
             col /= nsamples as f64;
-            col = col.sqrt();
-            println!(
-                "{0} {1} {2}",
-                (255.99 * col.r.min(1.0).max(0.0)) as u32,
-                (255.99 * col.g.min(1.0).max(0.0)) as u32,
-                (255.99 * col.b.min(1.0).max(0.0)) as u32
-            );
-        }
+            return col.sqrt();
+        })
+        .collect::<Vec<Rgb>>()
+    {
+        println!(
+            "{0} {1} {2}",
+            (255.99 * col.r.min(1.0).max(0.0)) as u32,
+            (255.99 * col.g.min(1.0).max(0.0)) as u32,
+            (255.99 * col.b.min(1.0).max(0.0)) as u32
+        );
     }
 }

@@ -6,7 +6,7 @@ use crate::texture::image::Pixel;
 use crate::math::{Rgb, Uv, Vec3};
 use crate::util::Perlin;
 
-pub trait Texture: core::fmt::Debug {
+pub trait Texture: core::fmt::Debug + Send + Sync {
     fn value(&self, uv: &Uv, p: &Vec3) -> Rgb;
 }
 

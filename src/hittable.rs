@@ -14,7 +14,7 @@ pub struct HitRecord<'a> {
     pub mat_ptr: &'a dyn Material,
 }
 
-pub trait Hittable: Debug {
+pub trait Hittable: Debug + Send + Sync {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
     fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB>;
 }
