@@ -1,6 +1,6 @@
 extern crate rand;
 
-use crate::math::Vec3;
+use crate::math::{Uv, Vec3};
 use rand::Rng;
 
 pub fn random_in_unit_sphere() -> Vec3 {
@@ -152,4 +152,14 @@ impl Perlin {
         }
         return perlin_interp(c, u, v, w);
     }
+}
+
+pub fn get_sphere_uv(p: &Vec3) -> Uv {
+    let pp = p.normalized();
+    let phi = pp.z.atan2(pp.x);
+    let theta = pp.y.asin();
+    let PI = std::f64::consts::PI;
+    let u = 1.0 - (phi + PI) / (2.0 * PI);
+    let v = (theta + PI/2.0) / PI;
+    return Uv::new(u, v);
 }

@@ -1,8 +1,11 @@
-extern crate raytracer; extern crate rand;
+extern crate raytracer;
+extern crate rand;
+extern crate image;
 
 use rand::Rng;
+use std::path::Path;
 
-use raytracer::math::{Vec3, Rgb};
+use raytracer::math::{Rgb, Vec3};
 use raytracer::ray::Ray;
 use raytracer::hittable::Hittable;
 use raytracer::camera::Camera;
@@ -10,7 +13,7 @@ use raytracer::primitives::Sphere;
 use raytracer::material::lambertian::Lambertian;
 use raytracer::material::metal::Metal;
 use raytracer::material::dielectric::Dielectric;
-use raytracer::texture::{ConstantTexture, CheckerTexture, NoiseTexture};
+use raytracer::texture::{ConstantTexture, CheckerTexture, NoiseTexture, ImageTexture};
 use raytracer::bvh::BvhNode;
 use raytracer::util::Perlin;
 
@@ -32,6 +35,7 @@ fn big_scene() -> Box<dyn Hittable> {
             Sphere{center: Vec3{x: 0.0, y: -1000.0, z: -0.0}, radius: 1000.0,
             mat: Box::new(Lambertian::new(
                 Box::new(NoiseTexture::new(Perlin::new(), 5.0))
+                // Box::new(ImageTexture::new(image::open(&Path::new("earth.jpg")).unwrap()))
             ))
         }
     ));
@@ -51,9 +55,14 @@ fn big_scene() -> Box<dyn Hittable> {
             }
         }
     }
-    hl.push(Box::new(Sphere{center: Vec3::new(-4.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Lambertian::new(Box::new(ConstantTexture::new(Rgb::new(0.4, 0.2, 0.1)))))}));
-    hl.push(Box::new(Sphere{center: Vec3::new(0.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Dielectric::new(1.5))}));
-    hl.push(Box::new(Sphere{center: Vec3::new(4.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Metal::new(Rgb::new(0.7, 0.6, 0.5), 0.0))}));
+    hl.push(Box::new(Sphere{center: Vec3::new(-4.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Lambertian::new(
+                Box::new(ImageTexture::new(image::open(&Path::new("earth.jpg")).unwrap()))
+    ))}));
+    hl.push(Box::new(Sphere{center: Vec3::new(0.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Lambertian::new(
+                Box::new(ImageTexture::new(image::open(&Path::new("earth.jpg")).unwrap()))
+    ))}));
+    // hl.push(Box::new(Sphere{center: Vec3::new(0.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Dielectric::new(1.5))}));
+    //hl.push(Box::new(Sphere{center: Vec3::new(4.0, 1.0, 0.0), radius: 1.0, mat: Box::new(Metal::new(Rgb::new(0.7, 0.6, 0.5), 0.0))}));
 
     return BvhNode::construct(&mut hl, 0.0, 0.0);
 }
@@ -81,8 +90,6 @@ fn main() {
                         return Rgb::zero();
                     }
                 }
-                // let normal = rh.normal;
-                // return 0.5 * Rgb {r: normal.x + 1.0, g: normal.y + 1.0, b: normal.z + 1.0};
             },
             _ => (),
         }
@@ -92,7 +99,7 @@ fn main() {
     }
 
     let nx : u32 = 300;
-    let ny : u32 = 200;
+    let ny : u32 = 150;
 
     let lookfrom = Vec3::new(5.0, 1.0, 2.0);
     let lookat = Vec3::new(0.0, 0.2, 0.0);

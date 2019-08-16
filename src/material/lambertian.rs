@@ -1,6 +1,6 @@
 extern crate rand;
 
-use crate::math::{Rgb, Vec3};
+use crate::math::{Rgb, Uv, Vec3};
 use crate::ray::Ray;
 use crate::hittable::HitRecord;
 use crate::util::random_in_unit_sphere;
@@ -22,7 +22,7 @@ impl Material for Lambertian {
     fn scatter(&self, _r: &Ray, hr: &HitRecord) -> Option<(Ray, Rgb)> {
         let target: Vec3 = hr.p + hr.normal + random_in_unit_sphere();
         let scattered = Ray::new(hr.p, target - hr.p);
-        let attenuation = self.albedo.value(0.0, 0.0, hr.p);
+        let attenuation = self.albedo.value(hr.uv, hr.p);
         return Some((scattered, attenuation));
     }
 }

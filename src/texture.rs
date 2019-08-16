@@ -1,8 +1,13 @@
-use crate::math::{Rgb, Vec3};
+extern crate image;
+
+use crate::texture::image::GenericImageView;
+use crate::texture::image::Pixel;
+
+use crate::math::{Rgb, Uv, Vec3};
 use crate::util::Perlin;
 
 pub trait Texture: core::fmt::Debug {
-    fn value(&self, u: f64, v: f64, p: Vec3) -> Rgb;
+    fn value(&self, uv: Uv, p: Vec3) -> Rgb;
 }
 
 #[derive(Debug)]
@@ -17,7 +22,7 @@ impl ConstantTexture {
 }
 
 impl Texture for ConstantTexture {
-    fn value(&self, _u: f64, _v: f64, _p: Vec3) -> Rgb {
+    fn value(&self, _uv: Uv, _p: Vec3) -> Rgb {
         self.color
     }
 }
@@ -35,9 +40,9 @@ impl CheckerTexture {
 }
 
 impl Texture for CheckerTexture {
-    fn value(&self, u: f64, v: f64, p: Vec3) -> Rgb {
+    fn value(&self, uv: Uv, p: Vec3) -> Rgb {
         let sines = (10.0*p.x).sin() * (10.0*p.y).sin() * (10.0*p.z).sin();
-        return (if sines < 0.0 {&self.odd} else {&self.even}).value(u, v, p)
+        return (if sines < 0.0 {&self.odd} else {&self.even}).value(uv, p)
     }
 }
 
@@ -54,7 +59,37 @@ impl NoiseTexture {
 }
 
 impl Texture for NoiseTexture {
-    fn value(&self, _u: f64, _v: f64, p: Vec3) -> Rgb {
+    fn value(&self, _uv: Uv, p: Vec3) -> Rgb {
         return Rgb::new(1.0, 1.0, 1.0) * self.noise.noise(&(self.scale * p));
+    }
+}
+
+pub struct ImageTexture {
+    image: image::DynamicImage,
+}
+
+impl ImageTexture {
+    pub fn new(image: image::DynamicImage) -> ImageTexture {
+        Self {image}
+    }
+}
+
+impl Texture for ImageTexture {
+    fn value(&self, uv: Uv, _p: Vec3) -> Rgb {
+        let (nx, ny) = self.image.dimensions();
+        let i = ((uv.u * nx as f64) as u32).max(0).min(nx-1);
+        let j = (((1.0 - uv.v) * (ny as f64) - 0.001) as u32).max(0).min(ny-1);
+        let rgb = self.image.get_pixel(i, j).to_rgb();
+        return Rgb::new(
+            (rgb[0] as f64)/255.0,
+            (rgb[1] as f64)/255.0,
+            (rgb[2] as f64)/255.0
+        );
+    }
+}
+
+impl std::fmt::Debug for ImageTexture {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "<ImageTexture>")
     }
 }

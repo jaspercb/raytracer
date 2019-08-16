@@ -11,3 +11,5 @@ pub type Mat4 = vek::Mat4<f64>;
 pub type Rgba = vek::Rgba<f64>;
 pub type Rgb = vek::Rgb<f64>;
 
+pub type Uv = vek::Uv<f64>;
+

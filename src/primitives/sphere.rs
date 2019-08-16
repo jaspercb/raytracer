@@ -1,4 +1,5 @@
 use crate::math::Vec3;
+use crate::util::get_sphere_uv;
 use crate::ray::Ray;
 use crate::hittable::{Hittable, HitRecord};
 use crate::material::Material;
@@ -26,20 +27,24 @@ impl Hittable for Sphere {
         let temp = (-b - discriminant.sqrt()) / (2.0*a);
         if temp < t_max && temp > t_min {
             let p = r.at(temp);
+            let normal = (p - self.center).normalized();
             return Some(HitRecord {
                 t: temp,
                 p: p,
-                normal: (p - self.center).normalized(),
+                uv: get_sphere_uv(&normal),
+                normal: normal,
                 mat_ptr: &*self.mat,
             });
         }
         let temp = (-b + discriminant.sqrt()) / (2.0*a);
         if temp < t_max && temp > t_min {
             let p = r.at(temp);
+            let normal = (p - self.center).normalized();
             return Some(HitRecord {
                 t: temp,
                 p: p,
-                normal: (p - self.center).normalized(),
+                uv: get_sphere_uv(&normal),
+                normal: normal,
                 mat_ptr: &*self.mat,
             });
         }

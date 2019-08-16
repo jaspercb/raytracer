@@ -2,13 +2,14 @@ use core::fmt::Debug;
 
 use crate::aabb::AABB;
 use crate::material::Material;
-use crate::math::Vec3;
+use crate::math::{Uv, Vec3};
 use crate::ray::Ray;
 
 #[derive(Debug, Clone)]
 pub struct HitRecord<'a> {
     pub t: f64,
     pub p: Vec3,
+    pub uv: Uv,
     pub normal: Vec3,
     pub mat_ptr: &'a dyn Material,
 }
